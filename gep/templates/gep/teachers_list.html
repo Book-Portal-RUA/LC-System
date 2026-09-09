@@ -1,0 +1,42 @@
+{% extends base_template %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="font-serif mb-0" style="font-size:1.3rem;">Teachers</h2>
+  <a href="{% url 'teacher-create' %}" class="btn btn-primary btn-sm">Add Teacher</a>
+</div>
+<div class="grid-wrap">
+<table class="table gradebook mb-0">
+  <thead>
+    <tr><th class="name-col">Teacher ID</th><th>English Name</th><th>Khmer Name</th><th>Sex</th><th>Subject</th><th>Email</th><th>Phone</th><th>Status</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for t in teachers %}
+    <tr>
+      <td class="name-col">{{ t.teacher_id }}</td>
+      <td>{{ t.english_name }}</td>
+      <td class="khmer-text">{{ t.khmer_name }}</td>
+      <td>{{ t.get_sex_display }}</td>
+      <td>{{ t.subject }}</td>
+      <td>{{ t.email }}</td>
+      <td>{{ t.phone }}</td>
+      <td>
+        {% if t.status == 'Active' %}<span class="badge-grade grade-good">Active</span>
+        {% else %}<span class="badge-grade grade-bad">Inactive</span>{% endif %}
+      </td>
+      <td class="text-nowrap">
+        <a href="{% url 'teacher-update' t.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+        <form method="post" action="{% url 'teacher-toggle' t.pk %}" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-outline-secondary">
+            {% if t.status == 'Active' %}Deactivate{% else %}Activate{% endif %}
+          </button>
+        </form>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="9" class="text-slate">No teachers yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

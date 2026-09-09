@@ -1,0 +1,54 @@
+{% extends base_template %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h2 class="font-serif mb-0" style="font-size:1.3rem;">
+    Score Record {% if current_class %}<span class="text-slate fs-6">— {{ current_class.name }} ({{ current_class.term.name }})</span>{% endif %}
+  </h2>
+</div>
+
+{% if not current_class %}
+<div class="sheet">No class available yet.</div>
+{% else %}
+<div class="grid-wrap">
+<table class="table gradebook mb-0">
+  <thead>
+    <tr>
+      <th class="name-col">Student</th>
+      <th>ATT %</th><th>ATT wt</th>
+      <th>CP %</th><th>CP wt</th>
+      <th>HW %</th><th>HW wt</th>
+      <th>Q %</th><th>Q wt</th>
+      <th>A/P %</th><th>A/P wt</th>
+      <th>Mid %</th><th>Mid wt</th>
+      <th>Fin %</th><th>Fin wt</th>
+      <th>Total</th><th>Grade</th><th>Rank</th><th>Overall Performance</th><th>Final Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+    <tr>
+      <td class="name-col">{{ row.enrollment.student.student_code }} — {{ row.enrollment.student.english_name }}</td>
+      {% for c in row.components %}
+        <td class="text-center">{{ c.percent }}</td>
+        <td class="text-center text-slate">{{ c.contribution }}</td>
+      {% endfor %}
+      <td class="text-center fw-bold">{{ row.total }}</td>
+      <td class="text-center">
+        {% if 'A' in row.grade or 'B' in row.grade %}<span class="badge-grade grade-good">{{ row.grade }}</span>
+        {% elif 'C' in row.grade or 'D' in row.grade %}<span class="badge-grade grade-warn">{{ row.grade }}</span>
+        {% else %}<span class="badge-grade grade-bad">{{ row.grade }}</span>{% endif %}
+      </td>
+      <td class="text-center {% if row.rank == 1 %}rank-1{% endif %}">{{ row.rank }}</td>
+      <td>{{ row.performance }}</td>
+      <td>{{ row.final_result }}</td>
+      <td><a href="{% url 'report-card' row.enrollment.pk %}">Report Card</a></td>
+    </tr>
+    {% empty %}
+    <tr><td class="text-slate">No active students in this class yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+<p class="text-slate small mt-2">"%" columns are each category normalized to 0–100; "wt" columns are that category's weighted contribution toward the Total (out of 100).</p>
+{% endif %}
+{% endblock %}

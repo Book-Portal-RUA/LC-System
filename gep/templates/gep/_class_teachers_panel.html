@@ -1,0 +1,42 @@
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="sheet h-100">
+      <h3 class="text-slate mb-3" style="font-size:0.95rem;">Assigned to {{ current.name }}</h3>
+      {% for t in assigned %}
+        <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+          <span>{{ t.english_name }} <span class="text-slate">({{ t.teacher_id }})</span></span>
+          <form method="post" action="{% url 'class-teachers' %}"
+                hx-post="{% url 'class-teachers' %}" hx-target="#class-teachers-panel" hx-swap="innerHTML">
+            {% csrf_token %}
+            <input type="hidden" name="class_id" value="{{ current.pk }}">
+            <input type="hidden" name="teacher_id" value="{{ t.pk }}">
+            <input type="hidden" name="action" value="remove">
+            <button type="submit" class="btn btn-sm btn-outline-secondary">Remove</button>
+          </form>
+        </div>
+      {% empty %}
+        <p class="text-slate">No teachers assigned yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="sheet h-100">
+      <h3 class="text-slate mb-3" style="font-size:0.95rem;">Available active teachers</h3>
+      {% for t in available %}
+        <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+          <span>{{ t.english_name }} <span class="text-slate">({{ t.teacher_id }})</span></span>
+          <form method="post" action="{% url 'class-teachers' %}"
+                hx-post="{% url 'class-teachers' %}" hx-target="#class-teachers-panel" hx-swap="innerHTML">
+            {% csrf_token %}
+            <input type="hidden" name="class_id" value="{{ current.pk }}">
+            <input type="hidden" name="teacher_id" value="{{ t.pk }}">
+            <input type="hidden" name="action" value="add">
+            <button type="submit" class="btn btn-sm btn-accent">Add</button>
+          </form>
+        </div>
+      {% empty %}
+        <p class="text-slate">No other active teachers available.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>

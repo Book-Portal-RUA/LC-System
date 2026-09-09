@@ -1,0 +1,5 @@
+Django>=5.1,<5.2
+weasyprint>=69.0
+# WeasyPrint pulls in fonttools, but versions below this hit a font-subsetting
+# bug on some system font sets ("expected 0 <= int <= 122, found: 123").
+fonttools>=4.64.0

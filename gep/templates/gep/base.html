@@ -1,0 +1,109 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}GEP Student Assessment System{% endblock %}</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Khmer:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'gep/css/custom.css' %}">
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Dropdowns inside horizontally-scrolling gradebook tables (e.g. the
+  // Attendance picker) need position:fixed to avoid being clipped by the
+  // table's own overflow:auto -- Bootstrap's default is position:absolute,
+  // which gets cut off in that context. This applies the fix on first load
+  // and again after every htmx swap, since a swapped-in cell is a brand new
+  // DOM node that hasn't been initialized yet.
+  function gepInitDropdowns(root) {
+    (root || document).querySelectorAll('[data-bs-toggle="dropdown"]').forEach(function (el) {
+      if (!bootstrap.Dropdown.getInstance(el)) {
+        new bootstrap.Dropdown(el, { popperConfig: { strategy: 'fixed' } });
+      }
+    });
+  }
+  document.addEventListener('DOMContentLoaded', function () { gepInitDropdowns(document); });
+  document.addEventListener('htmx:afterSettle', function (evt) { gepInitDropdowns(evt.target); });
+</script>
+</head>
+<body>
+{% if user.is_authenticated %}
+<nav class="navbar navbar-expand-lg gep-navbar" aria-label="Main navigation">
+  <div class="gep-shell d-flex align-items-center w-100 py-0">
+    <a class="navbar-brand me-4" href="{% url 'dashboard' %}">
+      General English Program
+      <small>Student Assessment System</small>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain" style="border-color: rgba(255,255,255,.3)">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'students' %}active{% endif %}" href="{% url 'students' %}">Students</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Assessment</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{% url 'score-entry' 'quiz' %}">Quiz</a></li>
+            <li><a class="dropdown-item" href="{% url 'score-entry' 'participation' %}">Class Participation</a></li>
+            <li><a class="dropdown-item" href="{% url 'score-entry' 'homework' %}">Homework</a></li>
+            <li><a class="dropdown-item" href="{% url 'score-entry' 'assignment' %}">Assignment</a></li>
+            <li><a class="dropdown-item" href="{% url 'attendance' %}">Attendance</a></li>
+            <li><a class="dropdown-item" href="{% url 'exam-entry' 'midterm' %}">Midterm</a></li>
+            <li><a class="dropdown-item" href="{% url 'exam-entry' 'final' %}">Final</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Results</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{% url 'score-record' %}">Score Record</a></li>
+            <li><a class="dropdown-item" href="{% url 'final-result' %}">Final Result</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'comment-bank' %}">Comment Bank</a></li>
+        {% if user.is_superuser %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Admin</a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="{% url 'teacher-list' %}">Teachers</a></li>
+            <li><a class="dropdown-item" href="{% url 'class-teachers' %}">Class Teachers</a></li>
+            <li><a class="dropdown-item" href="{% url 'classgroup-list' %}">Classes</a></li>
+            <li><a class="dropdown-item" href="{% url 'term-list' %}">Terms</a></li>
+            <li><a class="dropdown-item" href="{% url 'academicyear-list' %}">Academic Years</a></li>
+          </ul>
+        </li>
+        {% endif %}
+      </ul>
+      <ul class="navbar-nav align-items-lg-center">
+        {% if allowed_classes and allowed_classes.count > 1 %}
+        <li class="nav-item me-lg-3 my-2 my-lg-0 class-switcher">
+          {% include 'gep/_class_switcher.html' %}
+        </li>
+        {% endif %}
+        <li class="nav-item"><span class="nav-link disabled">{{ user.get_username }}</span></li>
+        <li class="nav-item">
+          <form method="post" action="{% url 'logout' %}">{% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-light">Log out</button>
+          </form>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+{% endif %}
+
+<div class="gep-shell">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+  <div id="page-content">
+    {% block content %}{% endblock %}
+  </div>
+</div>
+</body>
+</html>

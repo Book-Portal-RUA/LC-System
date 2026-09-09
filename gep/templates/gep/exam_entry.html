@@ -1,0 +1,29 @@
+{% extends base_template %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h2 class="font-serif mb-0" style="font-size:1.3rem;">
+    {{ exam_type }} Exam {% if current_class %}<span class="text-slate fs-6">— {{ current_class.name }}</span>{% endif %}
+  </h2>
+  <span class="badge-grade grade-good">Weight: {% if exam_type_slug == 'midterm' %}30{% else %}35{% endif %}%</span>
+</div>
+
+{% if not current_class %}
+<div class="sheet">No class available yet.</div>
+{% else %}
+<p class="text-slate">Each skill is scored out of 30. Sub-total is out of 120; the percentage is Sub-total &divide; 120 &times; 100.</p>
+<div class="grid-wrap">
+<table class="table gradebook mb-0">
+  <thead>
+    <tr><th class="name-col">Student</th><th>Listening</th><th>Speaking</th><th>Reading</th><th>Writing</th><th>Sub-total</th><th>Percent</th></tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+      {% include 'gep/_exam_row.html' with enrollment=row.enrollment result=row.result %}
+    {% empty %}
+    <tr><td class="text-slate">No active students in this class yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

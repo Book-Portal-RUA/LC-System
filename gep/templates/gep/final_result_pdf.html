@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { size: A4 landscape; margin: 1.4cm; }
+  body { font-family: 'DejaVu Sans', 'Khmer OS', Arial, sans-serif; font-size: 10pt; color: #14283d; }
+  h1 { font-size: 15pt; margin-bottom: 0; }
+  p.sub { color: #5b6b7a; margin-top: 2px; margin-bottom: 14px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { border: 1px solid #c9cfce; padding: 4px 6px; text-align: left; }
+  th { background: #eef1ed; }
+  td.num, th.num { text-align: center; }
+</style>
+</head>
+<body>
+  <h1>Final Result — {{ class_group.name }}</h1>
+  <p class="sub">{{ class_group.term.name }} &middot; {{ class_group.term.academic_year.name }} &middot; Room {{ class_group.room }}</p>
+  <table>
+    <thead>
+      <tr>
+        <th class="num">Rank</th><th>Student Code</th><th>English Name</th><th>Khmer Name</th>
+        <th class="num">Sex</th><th class="num">Total</th><th class="num">Grade</th>
+        <th>Overall Performance</th><th>Final Result</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td class="num">{{ row.rank }}</td>
+        <td>{{ row.enrollment.student.student_code }}</td>
+        <td>{{ row.enrollment.student.english_name }}</td>
+        <td>{{ row.enrollment.student.khmer_name }}</td>
+        <td class="num">{{ row.enrollment.student.get_gender_display }}</td>
+        <td class="num">{{ row.total }}</td>
+        <td class="num">{{ row.grade }}</td>
+        <td>{{ row.performance }}</td>
+        <td>{{ row.final_result }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

@@ -1,0 +1,68 @@
+{% extends base_template %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h2 class="font-serif mb-0" style="font-size:1.3rem;">
+    Attendance {% if current_class %}<span class="text-slate fs-6">— {{ current_class.name }}</span>{% endif %}
+  </h2>
+  {% if current_class %}
+  <span class="text-slate small">
+    Planned days this term: <strong>{{ current_class.total_class_days }}</strong>
+    {% if user.is_superuser %}(<a href="{% url 'classgroup-update' current_class.pk %}">edit</a>){% endif %}
+  </span>
+  {% endif %}
+</div>
+
+{% if not current_class %}
+<div class="sheet">No class available yet.</div>
+{% else %}
+<form method="post" action="{% url 'attendance-add-date' %}?class_id={{ current_class.pk }}" class="row g-2 align-items-end mb-3">
+  {% csrf_token %}
+  <div class="col-auto">
+    <label class="form-label small mb-0">Add attendance day</label>
+    <input type="date" name="date" class="form-control form-control-sm" value="{{ today }}">
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-accent btn-sm">Add day</button>
+  </div>
+  <div class="col-auto ms-auto">
+    <span class="att-badge att-present">P</span> Present &nbsp;
+    <span class="att-badge att-absent">A</span> Absent &nbsp;
+    <span class="att-badge att-tardy">T</span> Tardy &nbsp;
+    <span class="att-badge att-excused">E</span> Excused
+    <span class="text-slate ms-2">— click a badge to choose</span>
+  </div>
+</form>
+
+<div class="grid-wrap">
+<table class="table gradebook mb-0">
+  <thead>
+    <tr>
+      <th class="name-col">Student</th>
+      {% for d in dates %}<th>{{ d|date:"d M" }}</th>{% endfor %}
+      <th>P</th><th>A</th><th>T</th><th>E</th><th>Attendance %</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+    <tr>
+      <td class="name-col">{{ row.enrollment.student.student_code }} — {{ row.enrollment.student.english_name }}</td>
+      {% for cell in row.cells %}
+        {% include 'gep/_attendance_cell.html' with enrollment=cell.enrollment date=cell.date record=cell.record %}
+      {% endfor %}
+      <td class="text-center">{{ row.counts.Present }}</td>
+      <td class="text-center">{{ row.counts.Absent }}</td>
+      <td class="text-center">{{ row.counts.Tardy }}</td>
+      <td class="text-center">{{ row.counts.Excused }}</td>
+      <td class="text-center fw-semibold">{{ row.pct }}%</td>
+    </tr>
+    {% empty %}
+    <tr><td class="text-slate">No active students in this class yet.</td></tr>
+    {% endfor %}
+    {% if not dates %}
+    <tr><td colspan="5" class="text-slate">No attendance days yet — add one above.</td></tr>
+    {% endif %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

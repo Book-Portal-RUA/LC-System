@@ -1,0 +1,297 @@
+/* ---------------------------------------------------------------------
+   Design tokens
+   A school ledger, not a SaaS dashboard: deep ink blue + brass accent on
+   a cool paper background, a serif for headings/report content paired
+   with a workhorse sans for tables, forms and UI chrome.
+   ------------------------------------------------------------------- */
+:root {
+  --ink: #14283d;
+  --ink-soft: #1f3b57;
+  --steel: #3d5a73;
+  --brass: #b3842a;
+  --brass-deep: #8f6a20;
+  --paper: #f1f3ef;
+  --surface: #ffffff;
+  --slate: #5b6b7a;
+  --line: #dce1e0;
+  --good: #2f7d5a;
+  --good-bg: #e7f2ec;
+  --warn: #b9832e;
+  --warn-bg: #faf1e2;
+  --bad: #ab3d3d;
+  --bad-bg: #f7e9e9;
+  --excused: #5b6f86;
+  --excused-bg: #eaeef2;
+
+  --bs-primary: var(--ink);
+  --bs-primary-rgb: 20, 40, 61;
+  --bs-link-color: var(--ink-soft);
+  --bs-link-hover-color: var(--brass-deep);
+  --bs-body-bg: var(--paper);
+  --bs-body-color: #212b33;
+  --bs-border-radius: 0.35rem;
+  --bs-border-radius-sm: 0.25rem;
+  --bs-border-radius-lg: 0.45rem;
+  --bs-font-sans-serif: 'Inter', 'Noto Sans Khmer', -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--bs-font-sans-serif);
+  background-color: var(--paper);
+  font-variant-numeric: tabular-nums;
+}
+
+h1, h2, h3, h4, .font-serif {
+  font-family: 'Source Serif 4', Georgia, serif;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.khmer-text {
+  font-family: 'Noto Sans Khmer', 'Inter', sans-serif;
+}
+
+a { text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Top navigation -------------------------------------------------- */
+.gep-navbar {
+  background: var(--ink);
+  border-bottom: 3px solid var(--brass);
+}
+.gep-navbar .navbar-brand {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: #fff;
+}
+.gep-navbar .navbar-brand small {
+  display: block;
+  font-family: var(--bs-font-sans-serif);
+  font-size: 0.68rem;
+  color: #b9c3cd;
+  font-weight: 400;
+  margin-top: -2px;
+}
+.gep-navbar .nav-link {
+  color: #cfd8e0;
+  font-size: 0.92rem;
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+}
+.gep-navbar .nav-link:hover,
+.gep-navbar .nav-link.active {
+  color: #fff;
+}
+.gep-navbar .nav-link.active {
+  box-shadow: inset 0 -2px 0 var(--brass);
+}
+.gep-navbar .dropdown-menu {
+  border: 1px solid var(--line);
+  box-shadow: 0 6px 16px rgba(20, 40, 61, 0.12);
+}
+.class-switcher select {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.class-switcher select:focus {
+  background-color: #fff;
+  color: var(--ink);
+}
+
+/* Page shell -------------------------------------------------------- */
+.gep-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.75rem 1rem 3rem;
+}
+
+/* "Sheet" panels replace shadow-heavy cards -------------------------- */
+.sheet {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--bs-border-radius);
+  padding: 1.25rem 1.4rem;
+}
+
+.stat-strip {
+  display: flex;
+  flex-wrap: wrap;
+  border: 1px solid var(--line);
+  border-radius: var(--bs-border-radius);
+  background: var(--surface);
+  overflow: hidden;
+}
+.stat-strip .stat {
+  flex: 1 1 160px;
+  padding: 1rem 1.25rem;
+  border-right: 1px solid var(--line);
+}
+.stat-strip .stat:last-child { border-right: none; }
+.stat-strip .stat .num {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 1.8rem;
+  color: var(--ink);
+  line-height: 1;
+}
+.stat-strip .stat .label {
+  color: var(--slate);
+  font-size: 0.85rem;
+  margin-top: 0.3rem;
+}
+
+/* Buttons ------------------------------------------------------------ */
+.btn-primary {
+  background-color: var(--ink);
+  border-color: var(--ink);
+}
+.btn-primary:hover, .btn-primary:focus {
+  background-color: var(--ink-soft);
+  border-color: var(--ink-soft);
+}
+.btn-accent {
+  background-color: var(--brass);
+  border-color: var(--brass);
+  color: #fff;
+}
+.btn-accent:hover { background-color: var(--brass-deep); border-color: var(--brass-deep); color: #fff; }
+.btn-outline-primary {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+.btn-outline-primary:hover {
+  background-color: var(--ink);
+  border-color: var(--ink);
+}
+
+/* Gradebook grids ------------------------------------------------------ */
+.grid-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--bs-border-radius);
+  background: var(--surface);
+}
+table.gradebook {
+  margin-bottom: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+table.gradebook th, table.gradebook td {
+  vertical-align: middle;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+}
+table.gradebook thead th {
+  background: #eef1ed;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.82rem;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+table.gradebook td.name-col, table.gradebook th.name-col {
+  position: sticky;
+  left: 0;
+  background: var(--surface);
+  z-index: 1;
+  text-align: left;
+  white-space: normal;
+  min-width: 170px;
+}
+table.gradebook td.text-wrap { white-space: normal; min-width: 320px; }
+table.gradebook thead th.name-col { z-index: 3; background: #eef1ed; }
+table.gradebook input[type="number"] {
+  width: 4.2rem;
+  text-align: center;
+  padding: 0.25rem;
+}
+table.gradebook .score-cell-wrap { padding: 0.25rem; }
+
+/* Attendance badges ----------------------------------------------------- */
+.att-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 1.9rem;
+  border: none;
+  border-radius: var(--bs-border-radius-sm);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #fff;
+}
+.att-present { background-color: var(--good); }
+.att-absent { background-color: var(--bad); }
+.att-tardy { background-color: var(--warn); }
+.att-excused { background-color: var(--excused); }
+
+/* Attendance status picker: a compact row of the 4 shortcut letters that
+   opens on click, instead of cycling through statuses one click at a time. */
+.att-dropdown { display: inline-block; }
+.att-dropdown .att-badge { cursor: pointer; border: 2px solid transparent; }
+.att-dropdown .att-badge:hover { border-color: rgba(20, 40, 61, 0.35); }
+.dropdown-menu.att-picker {
+  display: flex;
+  gap: 0.3rem;
+  min-width: auto;
+  padding: 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: var(--bs-border-radius);
+  box-shadow: 0 10px 24px rgba(20, 40, 61, 0.18);
+}
+.att-picker li { list-style: none; }
+.att-picker-btn { opacity: 0.6; transition: opacity 0.12s ease, transform 0.12s ease; }
+.att-picker-btn:hover, .att-picker-btn:focus { opacity: 1; transform: translateY(-1px); }
+
+.badge-grade {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 0.95rem;
+  padding: 0.3em 0.65em;
+  border-radius: var(--bs-border-radius-sm);
+}
+.badge-grade.grade-good { background: var(--good-bg); color: var(--good); }
+.badge-grade.grade-warn { background: var(--warn-bg); color: var(--brass-deep); }
+.badge-grade.grade-bad { background: var(--bad-bg); color: var(--bad); }
+
+.rank-1 { color: var(--brass-deep); font-weight: 700; }
+
+/* Report card ----------------------------------------------------------- */
+.report-card-sheet {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--bs-border-radius);
+  padding: 2rem;
+}
+.report-card-sheet .rc-title {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 1.4rem;
+  color: var(--ink);
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 0.4rem;
+  margin-bottom: 1rem;
+}
+.rc-field-label { color: var(--slate); font-size: 0.82rem; }
+.rc-field-value { font-weight: 600; color: var(--ink); }
+.rc-signature-line {
+  border-top: 1px solid var(--ink);
+  margin-top: 3.5rem;
+  padding-top: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--slate);
+}
+.legend-table td, .legend-table th { padding: 0.15rem 0.5rem; font-size: 0.82rem; }
+
+/* Comment picker ---------------------------------------------------- */
+.comment-option {
+  text-align: left;
+  border-color: var(--line);
+}
+.comment-option:hover { background-color: var(--paper); }
+
+/* Utility ------------------------------------------------------------- */
+.text-slate { color: var(--slate); }
+.bg-paper { background-color: var(--paper); }
+.divider-brass { height: 3px; background: var(--brass); border: none; }

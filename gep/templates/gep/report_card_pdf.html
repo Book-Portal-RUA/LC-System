@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { size: A4; margin: 1.6cm; }
+  body { font-family: 'DejaVu Sans', 'Khmer OS', Arial, sans-serif; font-size: 10.5pt; color: #14283d; }
+  h1 { font-size: 16pt; border-bottom: 2px solid #14283d; padding-bottom: 6px; margin-bottom: 14px; }
+  h2 { font-size: 10.5pt; color: #5b6b7a; text-transform: none; margin-bottom: 4px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  td, th { padding: 3px 6px; vertical-align: top; }
+  .info-table td { border: none; }
+  .info-label { color: #5b6b7a; width: 40%; }
+  .info-value { font-weight: 600; }
+  .breakdown-table th, .breakdown-table td { border: 1px solid #c9cfce; text-align: center; }
+  .breakdown-table th.left, .breakdown-table td.left { text-align: left; }
+  .legend-table td { border: none; padding: 1px 6px; font-size: 9pt; }
+  .two-col { width: 48%; display: inline-block; vertical-align: top; }
+  .two-col + .two-col { margin-left: 3%; }
+  .comment-box { border: 1px solid #c9cfce; border-radius: 4px; padding: 10px; min-height: 60px; margin-top: 4px; }
+  .sig-row { margin-top: 56px; }
+  .sig-line { border-top: 1px solid #14283d; padding-top: 4px; font-size: 9pt; color: #5b6b7a; width: 45%; display: inline-block; }
+  .sig-line + .sig-line { margin-left: 5%; }
+</style>
+</head>
+<body>
+{% with student=enrollment.student cls=enrollment.class_group %}
+  <h1>General English Program — Student Report Card</h1>
+
+  <div class="two-col">
+    <h2>Student Information</h2>
+    <table class="info-table">
+      <tr><td class="info-label">Student's Name</td><td class="info-value">{{ student.english_name }} ({{ student.khmer_name }})</td></tr>
+      <tr><td class="info-label">Student's ID</td><td class="info-value">{{ student.student_code }}</td></tr>
+      <tr><td class="info-label">Class / Level</td><td class="info-value">{{ cls.name }} &middot; Room {{ cls.room }}</td></tr>
+      <tr><td class="info-label">Academic Year</td><td class="info-value">{{ cls.term.name }}, {{ cls.term.academic_year.name }}</td></tr>
+      <tr><td class="info-label">Teacher's Name</td><td class="info-value">{% for t in teachers %}{{ t.english_name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td></tr>
+      <tr><td class="info-label">Teacher's Contact</td><td class="info-value">{% for t in teachers %}{{ t.phone }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td></tr>
+    </table>
+  </div>
+  <div class="two-col">
+    <h2>Result Summary</h2>
+    <table class="info-table">
+      <tr><td class="info-label">Total Score</td><td class="info-value" style="font-size:13pt;">{{ breakdown.total }} / 100</td></tr>
+      <tr><td class="info-label">Grade</td><td class="info-value">{{ breakdown.grade }}</td></tr>
+      <tr><td class="info-label">Overall Performance</td><td class="info-value">{{ breakdown.performance }}</td></tr>
+      <tr><td class="info-label">Final Result</td><td class="info-value">{{ breakdown.final_result }}</td></tr>
+    </table>
+  </div>
+
+  <h2>Assessment Breakdown</h2>
+  <table class="breakdown-table">
+    <thead>
+      <tr><th class="left">Component</th>{% for c in breakdown.components %}<th>{{ c.short }}</th>{% endfor %}<th>Total</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="left">Expected Score (weight)</td>{% for c in breakdown.components %}<td>{{ c.weight }}</td>{% endfor %}<td><strong>100</strong></td></tr>
+      <tr><td class="left">Actual Score</td>{% for c in breakdown.components %}<td>{{ c.contribution }}</td>{% endfor %}<td><strong>{{ breakdown.total }}</strong></td></tr>
+      <tr><td class="left">Normalized %</td>{% for c in breakdown.components %}<td>{{ c.percent }}%</td>{% endfor %}<td>—</td></tr>
+    </tbody>
+  </table>
+
+  <div class="two-col">
+    <h2>Grading System</h2>
+    <table class="legend-table">
+      {% for range, grade in grade_legend %}<tr><td>{{ range }}</td><td><strong>{{ grade }}</strong></td></tr>{% endfor %}
+    </table>
+  </div>
+  <div class="two-col">
+    <h2>Performance Description</h2>
+    <table class="legend-table">
+      {% for range, label in performance_legend %}<tr><td>{{ range }}</td><td><strong>{{ label }}</strong></td></tr>{% endfor %}
+    </table>
+    <h2 style="margin-top:10px;">Attendance Summary</h2>
+    <table class="legend-table">
+      <tr><td>Absent</td><td><strong>{{ breakdown.attendance_counts.absent }}</strong></td></tr>
+      <tr><td>Excused</td><td><strong>{{ breakdown.attendance_counts.excused }}</strong></td></tr>
+      <tr><td>Tardy</td><td><strong>{{ breakdown.attendance_counts.tardy }}</strong></td></tr>
+      <tr><td>Present</td><td><strong>{{ breakdown.attendance_counts.present }}</strong></td></tr>
+      <tr><td>Planned days this term</td><td><strong>{{ breakdown.attendance_counts.total_days }}</strong></td></tr>
+    </table>
+  </div>
+
+  <h2>Teacher's Comment</h2>
+  <div class="comment-box">{{ remark.text|default:"—" }}</div>
+
+  <div class="sig-row">
+    <span class="sig-line">Teacher's Signature &amp; Date</span>
+    <span class="sig-line">Reviewed and Approved by &amp; Date</span>
+  </div>
+{% endwith %}
+</body>
+</html>

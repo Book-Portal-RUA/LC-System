@@ -1,0 +1,17 @@
+<tr id="exam-row-{{ enrollment.id }}" hx-target="this" hx-swap="outerHTML">
+  <td class="name-col">{{ enrollment.student.student_code }} — {{ enrollment.student.english_name }}</td>
+  <td><input type="number" min="0" max="30" step="0.5" name="listening" value="{{ result.listening|default:0 }}"
+             class="form-control form-control-sm"
+             hx-post="{% url 'exam-save' enrollment.id exam_type_slug %}" hx-trigger="change" hx-include="closest tr"></td>
+  <td><input type="number" min="0" max="30" step="0.5" name="speaking" value="{{ result.speaking|default:0 }}"
+             class="form-control form-control-sm"
+             hx-post="{% url 'exam-save' enrollment.id exam_type_slug %}" hx-trigger="change" hx-include="closest tr"></td>
+  <td><input type="number" min="0" max="30" step="0.5" name="reading" value="{{ result.reading|default:0 }}"
+             class="form-control form-control-sm"
+             hx-post="{% url 'exam-save' enrollment.id exam_type_slug %}" hx-trigger="change" hx-include="closest tr"></td>
+  <td><input type="number" min="0" max="30" step="0.5" name="writing" value="{{ result.writing|default:0 }}"
+             class="form-control form-control-sm"
+             hx-post="{% url 'exam-save' enrollment.id exam_type_slug %}" hx-trigger="change" hx-include="closest tr"></td>
+  <td class="text-center fw-semibold">{{ result.total|default:0 }} / 120</td>
+  <td class="text-center fw-semibold">{% if result %}{{ result.percent|floatformat:1 }}{% else %}0.0{% endif %}%</td>
+</tr>

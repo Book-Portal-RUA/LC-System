@@ -1,0 +1,27 @@
+{% extends base_template %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="font-serif mb-0" style="font-size:1.3rem;">Classes</h2>
+  <a href="{% url 'classgroup-create' %}" class="btn btn-primary btn-sm">Add Class</a>
+</div>
+<div class="grid-wrap">
+<table class="table gradebook mb-0">
+  <thead><tr><th class="name-col">Name</th><th>Term</th><th>Room</th><th>Book</th><th>Total Class Days</th><th>Teachers</th><th></th></tr></thead>
+  <tbody>
+    {% for c in classes %}
+    <tr>
+      <td class="name-col">{{ c.name }}</td>
+      <td>{{ c.term.name }} ({{ c.term.academic_year.name }})</td>
+      <td>{{ c.room }}</td>
+      <td>{{ c.book }}</td>
+      <td>{{ c.total_class_days }}</td>
+      <td>{% for t in c.teachers.all %}{{ t.english_name }}{% if not forloop.last %}, {% endif %}{% empty %}<span class="text-slate">—</span>{% endfor %}</td>
+      <td><a href="{% url 'classgroup-update' c.pk %}" class="btn btn-sm btn-outline-primary">Edit</a></td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7" class="text-slate">No classes yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

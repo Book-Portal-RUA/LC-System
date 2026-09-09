@@ -1,0 +1,20 @@
+{% extends base_template %}
+{% block content %}
+<h2 class="font-serif mb-3" style="font-size:1.3rem;">Class Teachers</h2>
+<form method="get" class="mb-3" style="max-width: 380px;">
+  <label class="form-label">Class</label>
+  <select name="class_id" class="form-select" onchange="this.form.submit()">
+    {% for c in classes %}
+      <option value="{{ c.pk }}" {% if current and c.pk == current.pk %}selected{% endif %}>{{ c.name }} — {{ c.term.name }}</option>
+    {% endfor %}
+  </select>
+</form>
+
+{% if current %}
+<div id="class-teachers-panel">
+  {% include 'gep/_class_teachers_panel.html' %}
+</div>
+{% else %}
+<div class="sheet">No classes yet. <a href="{% url 'classgroup-create' %}">Create one first</a>.</div>
+{% endif %}
+{% endblock %}

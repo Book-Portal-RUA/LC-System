@@ -1,0 +1,11 @@
+<td class="score-cell-wrap {% if error %}table-danger{% endif %}">
+  <input type="number" step="0.5" min="0" max="{{ item.max_points }}"
+         name="points"
+         value="{{ score.points|default_if_none:'' }}"
+         class="form-control form-control-sm {% if error %}is-invalid{% endif %}"
+         title="Out of {{ item.max_points }}"
+         hx-post="{% url 'score-cell-save' item.id enrollment.id %}"
+         hx-trigger="change"
+         hx-target="closest td"
+         hx-swap="outerHTML">
+</td>

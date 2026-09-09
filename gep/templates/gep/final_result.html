@@ -1,0 +1,51 @@
+{% extends base_template %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h2 class="font-serif mb-0" style="font-size:1.3rem;">
+    Final Result {% if current_class %}<span class="text-slate fs-6">— {{ current_class.name }} ({{ current_class.term.name }})</span>{% endif %}
+  </h2>
+  {% if current_class %}
+  <div class="d-flex gap-2">
+    <a class="btn btn-sm btn-outline-primary" href="{% url 'final-result-csv' %}?class_id={{ current_class.pk }}">Export CSV</a>
+    <a class="btn btn-sm btn-outline-primary" href="{% url 'final-result-pdf' %}?class_id={{ current_class.pk }}" target="_blank">Export PDF</a>
+  </div>
+  {% endif %}
+</div>
+
+{% if not current_class %}
+<div class="sheet">No class available yet.</div>
+{% else %}
+<div class="grid-wrap">
+<table class="table gradebook mb-0">
+  <thead>
+    <tr><th class="name-col">Rank</th><th>Student Code</th><th>English Name</th><th>Khmer Name</th><th>Sex</th><th>Total</th><th>Grade</th><th>Overall Performance</th><th>Final Result</th></tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+    <tr>
+      <td class="name-col {% if row.rank == 1 %}rank-1{% endif %}">{{ row.rank }}</td>
+      <td>{{ row.enrollment.student.student_code }}</td>
+      <td><a href="{% url 'report-card' row.enrollment.pk %}">{{ row.enrollment.student.english_name }}</a></td>
+      <td class="khmer-text">{{ row.enrollment.student.khmer_name }}</td>
+      <td>{{ row.enrollment.student.get_gender_display }}</td>
+      <td class="fw-bold">{{ row.total }}</td>
+      <td>
+        {% if 'A' in row.grade or 'B' in row.grade %}<span class="badge-grade grade-good">{{ row.grade }}</span>
+        {% elif 'C' in row.grade or 'D' in row.grade %}<span class="badge-grade grade-warn">{{ row.grade }}</span>
+        {% else %}<span class="badge-grade grade-bad">{{ row.grade }}</span>{% endif %}
+      </td>
+      <td>{{ row.performance }}</td>
+      <td>
+        {% if row.final_result == 'Promotion' %}<span class="badge-grade grade-good">{{ row.final_result }}</span>
+        {% elif row.final_result == 'Make Up' %}<span class="badge-grade grade-warn">{{ row.final_result }}</span>
+        {% else %}<span class="badge-grade grade-bad">{{ row.final_result }}</span>{% endif %}
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="9" class="text-slate">No active students in this class yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

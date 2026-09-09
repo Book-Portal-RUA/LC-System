@@ -1,0 +1,30 @@
+<td class="text-center p-1">
+  <div class="dropdown att-dropdown">
+    <button type="button"
+            class="att-badge att-{{ record.status|lower }}"
+            data-bs-toggle="dropdown" aria-expanded="false"
+            title="{{ record.status }} — click to change">{{ record.status|slice:":1" }}</button>
+    <ul class="dropdown-menu att-picker">
+      <li>
+        <button type="button" class="att-badge att-present att-picker-btn" title="Present"
+                hx-post="{% url 'attendance-set' enrollment.id date|date:'Y-m-d' 'Present' %}"
+                hx-target="closest td" hx-swap="outerHTML">P</button>
+      </li>
+      <li>
+        <button type="button" class="att-badge att-absent att-picker-btn" title="Absent"
+                hx-post="{% url 'attendance-set' enrollment.id date|date:'Y-m-d' 'Absent' %}"
+                hx-target="closest td" hx-swap="outerHTML">A</button>
+      </li>
+      <li>
+        <button type="button" class="att-badge att-tardy att-picker-btn" title="Tardy"
+                hx-post="{% url 'attendance-set' enrollment.id date|date:'Y-m-d' 'Tardy' %}"
+                hx-target="closest td" hx-swap="outerHTML">T</button>
+      </li>
+      <li>
+        <button type="button" class="att-badge att-excused att-picker-btn" title="Excused"
+                hx-post="{% url 'attendance-set' enrollment.id date|date:'Y-m-d' 'Excused' %}"
+                hx-target="closest td" hx-swap="outerHTML">E</button>
+      </li>
+    </ul>
+  </div>
+</td>

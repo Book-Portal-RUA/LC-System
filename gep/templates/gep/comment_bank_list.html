@@ -1,0 +1,39 @@
+{% extends base_template %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h2 class="font-serif mb-0" style="font-size:1.3rem;">Comment Bank</h2>
+  <a href="{% url 'comment-bank-create' %}" class="btn btn-primary btn-sm">Add Comment</a>
+</div>
+
+<div class="mb-3" style="max-width: 280px;">
+  <select name="category" class="form-select"
+          hx-get="{% url 'comment-bank' %}" hx-target="#comment-list" hx-select="#comment-list"
+          hx-swap="outerHTML" hx-push-url="true" hx-include="this">
+    <option value="">All categories</option>
+    {% for cat in categories %}<option value="{{ cat }}" {% if cat == category %}selected{% endif %}>{{ cat }}</option>{% endfor %}
+  </select>
+</div>
+
+<div id="comment-list" class="grid-wrap">
+<table class="table gradebook mb-0">
+  <thead><tr><th class="name-col">Category</th><th>Text</th><th></th></tr></thead>
+  <tbody>
+    {% for c in comments %}
+    <tr>
+      <td class="name-col">{{ c.category }}</td>
+      <td class="text-wrap">{{ c.text }}</td>
+      <td class="text-nowrap">
+        <a href="{% url 'comment-bank-update' c.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+        <form method="post" action="{% url 'comment-bank-delete' c.pk %}" class="d-inline" onsubmit="return confirm('Delete this comment?');">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-outline-secondary">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="3" class="text-slate">No comments in this category yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

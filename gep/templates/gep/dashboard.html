@@ -1,0 +1,65 @@
+{% extends base_template %}
+{% block content %}
+<h2 class="font-serif mb-1">
+  {% if is_admin %}Welcome back{% else %}Welcome back, {{ teacher.english_name }}{% endif %}
+</h2>
+<p class="text-slate mb-4">General English Program &middot; Student Assessment System</p>
+
+{% if is_admin %}
+<div class="stat-strip mb-4">
+  <div class="stat"><div class="num">{{ class_count }}</div><div class="label">Classes</div></div>
+  <div class="stat"><div class="num">{{ teacher_count }}</div><div class="label">Active teachers</div></div>
+  <div class="stat"><div class="num">{{ student_count }}</div><div class="label">Students</div></div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3"><a href="{% url 'teacher-list' %}" class="btn btn-outline-primary w-100">Manage Teachers</a></div>
+  <div class="col-md-3"><a href="{% url 'class-teachers' %}" class="btn btn-outline-primary w-100">Class Teachers</a></div>
+  <div class="col-md-3"><a href="{% url 'classgroup-list' %}" class="btn btn-outline-primary w-100">Manage Classes</a></div>
+  <div class="col-md-3"><a href="{% url 'academicyear-list' %}" class="btn btn-outline-primary w-100">Academic Years</a></div>
+</div>
+
+<h3 class="font-serif" style="font-size:1.1rem;">All classes</h3>
+<div class="grid-wrap">
+<table class="table gradebook mb-0">
+  <thead><tr><th class="name-col">Class</th><th>Term</th><th>Room</th><th>Book</th><th>Teachers</th><th></th></tr></thead>
+  <tbody>
+    {% for c in classes %}
+    <tr>
+      <td class="name-col">{{ c.name }}</td>
+      <td>{{ c.term.name }} ({{ c.term.academic_year.name }})</td>
+      <td>{{ c.room|default:"—" }}</td>
+      <td>{{ c.book|default:"—" }}</td>
+      <td>{% for t in c.teachers.all %}{{ t.english_name }}{% if not forloop.last %}, {% endif %}{% empty %}<span class="text-slate">Unassigned</span>{% endfor %}</td>
+      <td><a href="{% url 'students' %}?class_id={{ c.pk }}">Open roster</a></td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6" class="text-slate">No classes yet. <a href="{% url 'classgroup-create' %}">Create the first one</a>.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+
+{% else %}
+  {% if classes %}
+  <div class="row g-3">
+    {% for c in classes %}
+    <div class="col-md-6">
+      <div class="sheet h-100">
+        <h3 class="font-serif" style="font-size:1.2rem;">{{ c.name }}</h3>
+        <p class="text-slate mb-2">{{ c.term.name }} ({{ c.term.academic_year.name }}) &middot; Room {{ c.room|default:"—" }} &middot; {{ c.book }}</p>
+        <div class="d-flex flex-wrap gap-2">
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'students' %}?class_id={{ c.pk }}">Students</a>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'attendance' %}?class_id={{ c.pk }}">Attendance</a>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'score-record' %}?class_id={{ c.pk }}">Score Record</a>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'final-result' %}?class_id={{ c.pk }}">Final Result</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="sheet">You are not assigned to any class yet. Contact your Admin to be added to a class.</div>
+  {% endif %}
+{% endif %}
+{% endblock %}

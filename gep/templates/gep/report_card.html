@@ -1,0 +1,111 @@
+{% extends base_template %}
+{% block content %}
+{% with student=enrollment.student cls=enrollment.class_group %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="font-serif mb-0" style="font-size:1.3rem;">Report Card</h2>
+  <a class="btn btn-outline-primary btn-sm" href="{% url 'report-card-pdf' enrollment.pk %}" target="_blank">Export PDF</a>
+</div>
+
+<div class="report-card-sheet">
+  <div class="rc-title">General English Program — Student Report Card</div>
+
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <h3 class="text-slate mb-2" style="font-size:0.9rem;">Student Information</h3>
+      <table class="table table-sm table-borderless mb-0">
+        <tr><td class="rc-field-label" style="width:45%;">Student's Name</td><td class="rc-field-value">{{ student.english_name }} <span class="khmer-text text-slate">({{ student.khmer_name }})</span></td></tr>
+        <tr><td class="rc-field-label">Student's ID</td><td class="rc-field-value">{{ student.student_code }}</td></tr>
+        <tr><td class="rc-field-label">Class / Level</td><td class="rc-field-value">{{ cls.name }} &middot; Room {{ cls.room }}</td></tr>
+        <tr><td class="rc-field-label">Academic Year</td><td class="rc-field-value">{{ cls.term.name }}, {{ cls.term.academic_year.name }}</td></tr>
+        <tr><td class="rc-field-label">Teacher's Name</td><td class="rc-field-value">{% for t in teachers %}{{ t.english_name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td></tr>
+        <tr><td class="rc-field-label">Teacher's Contact</td><td class="rc-field-value">{% for t in teachers %}{{ t.phone }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td></tr>
+      </table>
+    </div>
+    <div class="col-md-6">
+      <h3 class="text-slate mb-2" style="font-size:0.9rem;">Result Summary</h3>
+      <table class="table table-sm table-borderless mb-0">
+        <tr><td class="rc-field-label" style="width:45%;">Total Score</td><td class="rc-field-value" style="font-size:1.3rem;">{{ breakdown.total }} / 100</td></tr>
+        <tr><td class="rc-field-label">Grade</td><td class="rc-field-value">{{ breakdown.grade }}</td></tr>
+        <tr><td class="rc-field-label">Overall Performance</td><td class="rc-field-value">{{ breakdown.performance }}</td></tr>
+        <tr><td class="rc-field-label">Final Result</td><td class="rc-field-value">{{ breakdown.final_result }}</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <h3 class="text-slate mb-2" style="font-size:0.9rem;">Assessment Breakdown</h3>
+  <div class="table-responsive mb-4">
+    <table class="table table-sm table-bordered text-center mb-0">
+      <thead class="table-light">
+        <tr><th class="text-start">Component</th>{% for c in breakdown.components %}<th>{{ c.short }}</th>{% endfor %}<th>Total</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="text-start text-slate">Expected Score (weight)</td>{% for c in breakdown.components %}<td>{{ c.weight }}</td>{% endfor %}<td class="fw-bold">100</td></tr>
+        <tr><td class="text-start text-slate">Actual Score</td>{% for c in breakdown.components %}<td>{{ c.contribution }}</td>{% endfor %}<td class="fw-bold">{{ breakdown.total }}</td></tr>
+        <tr><td class="text-start text-slate">Normalized %</td>{% for c in breakdown.components %}<td>{{ c.percent }}%</td>{% endfor %}<td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <h3 class="text-slate mb-2" style="font-size:0.9rem;">Grading System</h3>
+      <table class="table table-sm legend-table mb-0">
+        {% for range, grade in grade_legend %}<tr><td>{{ range }}</td><td class="fw-semibold">{{ grade }}</td></tr>{% endfor %}
+      </table>
+    </div>
+    <div class="col-md-6">
+      <h3 class="text-slate mb-2" style="font-size:0.9rem;">Performance Description</h3>
+      <table class="table table-sm legend-table mb-0">
+        {% for range, label in performance_legend %}<tr><td>{{ range }}</td><td class="fw-semibold">{{ label }}</td></tr>{% endfor %}
+      </table>
+      <h3 class="text-slate mb-2 mt-3" style="font-size:0.9rem;">Attendance Summary</h3>
+      <table class="table table-sm legend-table mb-0">
+        <tr><td>Absent</td><td class="fw-semibold">{{ breakdown.attendance_counts.absent }}</td></tr>
+        <tr><td>Excused</td><td class="fw-semibold">{{ breakdown.attendance_counts.excused }}</td></tr>
+        <tr><td>Tardy</td><td class="fw-semibold">{{ breakdown.attendance_counts.tardy }}</td></tr>
+        <tr><td>Present</td><td class="fw-semibold">{{ breakdown.attendance_counts.present }}</td></tr>
+        <tr><td>Planned days this term</td><td class="fw-semibold">{{ breakdown.attendance_counts.total_days }}</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <h3 class="text-slate mb-2" style="font-size:0.9rem;">Teacher's Comment</h3>
+  <div class="row mb-2">
+    <div class="col-md-7">
+      <form id="remark-form"
+            hx-post="{% url 'report-card-save-remark' enrollment.pk %}"
+            hx-target="#remark-status" hx-swap="innerHTML">
+        {% csrf_token %}
+        <textarea id="id_remark_text" name="text" class="form-control" rows="5">{{ remark.text }}</textarea>
+        <div class="d-flex align-items-center gap-2 mt-2">
+          <button type="submit" class="btn btn-primary btn-sm">Save comment</button>
+          <span id="remark-status"></span>
+        </div>
+      </form>
+    </div>
+    <div class="col-md-5">
+      <label class="form-label small text-slate mb-1">Suggest from Comment Bank</label>
+      <select class="form-select form-select-sm mb-2"
+              hx-get="{% url 'report-card-comment-options' enrollment.pk %}"
+              hx-target="#comment-options-wrap" hx-swap="innerHTML" hx-trigger="load, change"
+              name="category">
+        {% for cat in comment_categories %}<option value="{{ cat }}">{{ cat }}</option>{% endfor %}
+      </select>
+      <div id="comment-options-wrap"></div>
+    </div>
+  </div>
+
+  <div class="row mt-5">
+    <div class="col-md-6"><div class="rc-signature-line">Teacher's Signature &amp; Date</div></div>
+    <div class="col-md-6"><div class="rc-signature-line">Reviewed and Approved by &amp; Date</div></div>
+  </div>
+</div>
+
+<script>
+function appendRemark(text) {
+  const el = document.getElementById('id_remark_text');
+  el.value = el.value.trim().length ? (el.value.trim() + ' ' + text) : text;
+}
+</script>
+{% endwith %}
+{% endblock %}

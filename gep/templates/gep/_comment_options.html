@@ -1,0 +1,10 @@
+<div class="list-group" id="comment-options" style="max-height: 220px; overflow-y: auto;">
+  {% for c in comments %}
+    <button type="button" class="list-group-item list-group-item-action comment-option small"
+            onclick="appendRemark('{{ c.text|escapejs }}')">
+      {{ c.text }}
+    </button>
+  {% empty %}
+    <div class="text-slate small p-2">No comments in "{{ category }}" yet.</div>
+  {% endfor %}
+</div>

@@ -1,0 +1,59 @@
+{% extends base_template %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h2 class="font-serif mb-0" style="font-size:1.3rem;">
+    {{ category.name }} {% if current_class %}<span class="text-slate fs-6">— {{ current_class.name }}</span>{% endif %}
+  </h2>
+  <span class="badge-grade grade-good">Weight: {{ category.weight_percent }}%</span>
+</div>
+
+{% if not current_class %}
+<div class="sheet">No class available yet.</div>
+{% else %}
+<form method="post" action="{% url 'score-item-add' category_slug %}?class_id={{ current_class.pk }}" class="row g-2 align-items-end mb-3">
+  {% csrf_token %}
+  <div class="col-auto">
+    <label class="form-label small mb-0">New item label</label>
+    {{ item_form.label }}
+  </div>
+  <div class="col-auto">
+    <label class="form-label small mb-0">Max points</label>
+    {{ item_form.max_points }}
+  </div>
+  <div class="col-auto">
+    <label class="form-label small mb-0">Date</label>
+    {{ item_form.date }}
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-accent btn-sm">Add item</button>
+  </div>
+</form>
+
+<div class="grid-wrap">
+<table class="table gradebook mb-0">
+  <thead>
+    <tr>
+      <th class="name-col">Student</th>
+      {% for item in items %}<th>{{ item.label }}<br><span class="text-slate" style="font-weight:400;">/{{ item.max_points|floatformat:0 }}</span></th>{% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% if not items %}
+    <tr><td class="text-slate">No items yet — add one above to start entering scores.</td></tr>
+    {% elif not rows %}
+    <tr><td class="text-slate">No active students in this class yet.</td></tr>
+    {% else %}
+      {% for row in rows %}
+      <tr>
+        <td class="name-col">{{ row.enrollment.student.student_code }} — {{ row.enrollment.student.english_name }}</td>
+        {% for cell in row.cells %}
+          {% include 'gep/_score_cell.html' with item=cell.item enrollment=row.enrollment score=cell.score %}
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    {% endif %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

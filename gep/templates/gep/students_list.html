@@ -1,0 +1,64 @@
+{% extends base_template %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h2 class="font-serif mb-0" style="font-size:1.3rem;">
+    Students {% if current_class %}<span class="text-slate fs-6">— {{ current_class.name }} ({{ current_class.term.name }})</span>{% endif %}
+  </h2>
+  {% if current_class %}
+    <a href="{% url 'student-create' %}?class_id={{ current_class.pk }}" class="btn btn-primary btn-sm">Add Student</a>
+  {% endif %}
+</div>
+
+{% if not current_class %}
+<div class="sheet">
+  No class available yet.
+  {% if user.is_superuser %}<a href="{% url 'classgroup-create' %}">Create a class</a> to get started.
+  {% else %}Contact your Admin to be assigned to a class.{% endif %}
+</div>
+{% else %}
+<div class="mb-3" style="max-width: 320px;">
+  <input type="search" name="q" class="form-control" placeholder="Search by name or student code"
+         value="{{ q }}"
+         hx-get="{% url 'students' %}?class_id={{ current_class.pk }}"
+         hx-trigger="keyup changed delay:300ms, search"
+         hx-target="#students-table" hx-select="#students-table" hx-swap="outerHTML"
+         hx-include="this">
+</div>
+<div id="students-table" class="grid-wrap">
+<table class="table gradebook mb-0">
+  <thead>
+    <tr><th class="name-col">Student Code</th><th>English Name</th><th>Khmer Name</th><th>Gender</th><th>Date of Birth</th><th>Phone</th><th>Email</th><th>Status</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for e in enrollments %}
+    <tr>
+      <td class="name-col">{{ e.student.student_code }}</td>
+      <td>{{ e.student.english_name }}</td>
+      <td class="khmer-text">{{ e.student.khmer_name }}</td>
+      <td>{{ e.student.get_gender_display }}</td>
+      <td>{{ e.student.date_of_birth|date:"d M Y"|default:"—" }}</td>
+      <td>{{ e.student.phone }}</td>
+      <td>{{ e.student.email }}</td>
+      <td>
+        {% if e.status == 'Active' %}<span class="badge-grade grade-good">Active</span>
+        {% else %}<span class="badge-grade grade-bad">Inactive</span>{% endif %}
+      </td>
+      <td class="text-nowrap">
+        <a href="{% url 'student-update' e.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+        <a href="{% url 'report-card' e.pk %}" class="btn btn-sm btn-outline-secondary">Report Card</a>
+        <form method="post" action="{% url 'student-toggle' e.pk %}" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-outline-secondary">
+            {% if e.status == 'Active' %}Deactivate{% else %}Activate{% endif %}
+          </button>
+        </form>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="9" class="text-slate">No students match.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

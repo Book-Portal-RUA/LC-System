@@ -1,0 +1,17 @@
+{% load static %}
+<form class="d-flex align-items-center">
+  <select name="class_id"
+          class="form-select form-select-sm"
+          style="width: auto;"
+          aria-label="Switch class"
+          hx-get="{{ request.path }}"
+          hx-select="#page-content"
+          hx-target="#page-content"
+          hx-swap="outerHTML"
+          hx-push-url="true"
+          hx-include="this">
+    {% for c in allowed_classes %}
+      <option value="{{ c.pk }}" {% if current_class and c.pk == current_class.pk %}selected{% endif %}>{{ c.name }} — {{ c.term.name }}</option>
+    {% endfor %}
+  </select>
+</form>
