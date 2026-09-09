@@ -36,6 +36,7 @@ urlpatterns = [
     path('students/add/', views.student_create, name='student-create'),
     path('students/<int:enrollment_id>/edit/', views.student_update, name='student-update'),
     path('students/<int:enrollment_id>/toggle/', views.student_toggle_status, name='student-toggle'),
+    path('students/<int:enrollment_id>/delete/', views.student_delete, name='student-delete'),
 
     # Score entry grids
     path('scores/<str:category_slug>/', views.score_entry, name='score-entry'),

@@ -404,6 +404,21 @@ def student_toggle_status(request, enrollment_id):
     return redirect(f"{reverse('students')}?class_id={enrollment.class_group_id}")
 
 
+@login_required
+def student_delete(request, enrollment_id):
+    """Removes a student from this class's roster (deletes their Enrollment,
+    which cascades to their Scores/Attendance/Exam results/Remarks for this
+    class only). The StudentProfile itself, and any enrollment the same
+    student has in a different class or term, are untouched."""
+    enrollment = get_object_or_404(Enrollment, pk=enrollment_id)
+    if enrollment.class_group not in get_allowed_classes(request.user):
+        raise PermissionDenied
+    class_id = enrollment.class_group_id
+    if request.method == 'POST':
+        enrollment.delete()
+    return redirect(f"{reverse('students')}?class_id={class_id}")
+
+
 # ---------------------------------------------------------------------------
 # Score entry grids: Quiz / Class Participation / Homework / Assignment
 # ---------------------------------------------------------------------------
@@ -451,10 +466,19 @@ def score_item_add(request, category_slug):
     if request.method == 'POST':
         form = ScoreItemForm(request.POST)
         if form.is_valid():
-            item = form.save(commit=False)
-            item.class_group = cls
-            item.category = category
-            item.save()
+            with transaction.atomic():
+                item = form.save(commit=False)
+                item.class_group = cls
+                item.category = category
+                item.save()
+                # Start every currently-enrolled student at 0 for this new
+                # item, rather than leaving the column blank until each
+                # score is entered by hand.
+                enrollments = Enrollment.objects.filter(class_group=cls, status='Active')
+                Score.objects.bulk_create(
+                    [Score(score_item=item, enrollment=e, points=Decimal('0')) for e in enrollments],
+                    ignore_conflicts=True,
+                )
     return redirect(f"{reverse('score-entry', args=[category_slug])}?class_id={cls.pk}")
 
 
