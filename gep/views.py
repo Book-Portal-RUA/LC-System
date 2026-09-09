@@ -466,10 +466,19 @@ def score_item_add(request, category_slug):
     if request.method == 'POST':
         form = ScoreItemForm(request.POST)
         if form.is_valid():
-            item = form.save(commit=False)
-            item.class_group = cls
-            item.category = category
-            item.save()
+            with transaction.atomic():
+                item = form.save(commit=False)
+                item.class_group = cls
+                item.category = category
+                item.save()
+                # Start every currently-enrolled student at 0 for this new
+                # item, rather than leaving the column blank until each
+                # score is entered by hand.
+                enrollments = Enrollment.objects.filter(class_group=cls, status='Active')
+                Score.objects.bulk_create(
+                    [Score(score_item=item, enrollment=e, points=Decimal('0')) for e in enrollments],
+                    ignore_conflicts=True,
+                )
     return redirect(f"{reverse('score-entry', args=[category_slug])}?class_id={cls.pk}")
 
 
