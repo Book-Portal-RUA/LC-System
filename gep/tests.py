@@ -6,6 +6,7 @@ Run with: python manage.py test
 Uses Django's isolated test database (created/destroyed automatically), so
 running these never touches your real db.sqlite3 or seeded demo data.
 """
+from datetime import date, timedelta
 from decimal import Decimal
 
 from django.contrib.auth.models import User
@@ -123,9 +124,72 @@ class PermissionScopingTests(TestCase):
         resp = self.client.get(reverse('students'), {'class_id': self.cls.pk})
         self.assertEqual(resp.status_code, 200)
 
+    def test_teacher_cannot_delete_student_in_unassigned_class(self):
+        self.client.login(username='tom.peterson', password='teacher12345')
+        outsider = StudentProfile.objects.create(english_name='Outsider', gender='F')
+        other_enrollment = Enrollment.objects.create(student=outsider, class_group=self.other_class)
+        resp = self.client.post(reverse('student-delete', args=[other_enrollment.pk]))
+        self.assertEqual(resp.status_code, 403)
+        self.assertTrue(Enrollment.objects.filter(pk=other_enrollment.pk).exists())
+
+    def test_teacher_can_delete_student_in_own_class(self):
+        self.client.login(username='tom.peterson', password='teacher12345')
+        resp = self.client.post(reverse('student-delete', args=[self.enrollment.pk]))
+        self.assertRedirects(resp, f"{reverse('students')}?class_id={self.cls.pk}")
+        self.assertFalse(Enrollment.objects.filter(pk=self.enrollment.pk).exists())
+
     def test_anonymous_redirected_to_login(self):
         resp = self.client.get(reverse('dashboard'))
         self.assertEqual(resp.status_code, 302)
+
+
+class StudentDeleteTests(TestCase):
+    """'Remove' takes a student off one class's roster. It should only ever
+    act on POST, and it should only ever touch the one Enrollment being
+    removed -- never the StudentProfile itself, and never an enrollment the
+    same student has in a different class or term."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command('seed_demo_data', verbosity=0)
+
+    def setUp(self):
+        self.cls = ClassGroup.objects.first()
+        self.enrollment = Enrollment.objects.filter(class_group=self.cls).first()
+        self.client.login(username='admin', password='admin12345')
+
+    def test_get_does_not_delete(self):
+        resp = self.client.get(reverse('student-delete', args=[self.enrollment.pk]))
+        self.assertEqual(resp.status_code, 302)
+        self.assertTrue(Enrollment.objects.filter(pk=self.enrollment.pk).exists())
+
+    def test_post_deletes_enrollment_and_redirects_to_class_roster(self):
+        resp = self.client.post(reverse('student-delete', args=[self.enrollment.pk]))
+        self.assertRedirects(resp, f"{reverse('students')}?class_id={self.cls.pk}")
+        self.assertFalse(Enrollment.objects.filter(pk=self.enrollment.pk).exists())
+
+    def test_delete_removes_related_records_but_keeps_student_and_other_enrollments(self):
+        student = self.enrollment.student
+        other_cls = ClassGroup.objects.create(
+            name='Level 9', term=self.cls.term, room='X', total_class_days=20,
+        )
+        other_enrollment = Enrollment.objects.create(student=student, class_group=other_cls)
+        # seed_demo_data seeds attendance for "today" and the day before (see
+        # recent_weekdays() in seed_demo_data.py), so a hardcoded date here
+        # can collide with that and trip the (enrollment, date) unique
+        # constraint. Go back far enough that it never can.
+        safe_date = date.today() - timedelta(days=60)
+        attendance = AttendanceRecord.objects.create(
+            enrollment=self.enrollment, date=safe_date, status=AttendanceRecord.PRESENT,
+        )
+
+        self.client.post(reverse('student-delete', args=[self.enrollment.pk]))
+
+        self.assertFalse(Enrollment.objects.filter(pk=self.enrollment.pk).exists())
+        self.assertFalse(AttendanceRecord.objects.filter(pk=attendance.pk).exists())
+        # The student profile, and their enrollment in a different class, survive.
+        self.assertTrue(StudentProfile.objects.filter(pk=student.pk).exists())
+        self.assertTrue(Enrollment.objects.filter(pk=other_enrollment.pk).exists())
 
 
 class PageSmokeTests(TestCase):

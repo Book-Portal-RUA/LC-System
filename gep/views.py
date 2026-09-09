@@ -404,6 +404,21 @@ def student_toggle_status(request, enrollment_id):
     return redirect(f"{reverse('students')}?class_id={enrollment.class_group_id}")
 
 
+@login_required
+def student_delete(request, enrollment_id):
+    """Removes a student from this class's roster (deletes their Enrollment,
+    which cascades to their Scores/Attendance/Exam results/Remarks for this
+    class only). The StudentProfile itself, and any enrollment the same
+    student has in a different class or term, are untouched."""
+    enrollment = get_object_or_404(Enrollment, pk=enrollment_id)
+    if enrollment.class_group not in get_allowed_classes(request.user):
+        raise PermissionDenied
+    class_id = enrollment.class_group_id
+    if request.method == 'POST':
+        enrollment.delete()
+    return redirect(f"{reverse('students')}?class_id={class_id}")
+
+
 # ---------------------------------------------------------------------------
 # Score entry grids: Quiz / Class Participation / Homework / Assignment
 # ---------------------------------------------------------------------------
